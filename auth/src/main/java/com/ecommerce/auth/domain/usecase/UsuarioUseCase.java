@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 @RequiredArgsConstructor
-@Component
 public class UsuarioUseCase {
 
     private final UsuarioGateway usuarioGateway;
@@ -41,4 +40,20 @@ public class UsuarioUseCase {
         return Optional.ofNullable(usuarioGateway.buscarPorCorreo(correo))
                 .orElseThrow(() -> new UsuarioNoEncontradoException(correo));
     }
+
+    public String loginUsuario(String correo, String password) {
+        Usuario usuarioLogueo = usuarioGateway.buscarPorCorreo(correo);
+
+        if (usuarioLogueo == null) {
+            return "Usuario no encontrado";
+        }
+
+        if (usuarioLogueo.getClave().equals(password)) {
+            return "Credenciales Validas";
+        } else {
+            return "Credenciales Invalidas";
+        }
+    }
+
+
 }

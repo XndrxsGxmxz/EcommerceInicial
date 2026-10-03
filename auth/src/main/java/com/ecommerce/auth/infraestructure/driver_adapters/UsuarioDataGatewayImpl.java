@@ -37,10 +37,12 @@ public class UsuarioDataGatewayImpl implements UsuarioGateway {
         return mapperUsuario.toUsuario(repository.save(usuarioData));
     }
 
+
     @Override
     public Usuario buscarPorCorreo(String correo) {
-        return null;
+        return repository.findByCorreo(correo)
+                .map(mapperUsuario::toUsuario)
+                .orElse(null);
     }
-
 
 }
