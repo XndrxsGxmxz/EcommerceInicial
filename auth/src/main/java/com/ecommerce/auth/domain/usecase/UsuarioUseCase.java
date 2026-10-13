@@ -2,10 +2,10 @@ package com.ecommerce.auth.domain.usecase;
 
 import com.ecommerce.auth.domain.exception.UsuarioNoEncontradoException;
 import com.ecommerce.auth.domain.model.Usuario;
+import com.ecommerce.auth.domain.model.gateway.EncrypterGateway;
 import com.ecommerce.auth.domain.model.gateway.UsuarioGateway;
 import com.ecommerce.auth.domain.usecase.validation.UsuarioValidator;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
@@ -13,11 +13,17 @@ import java.util.Optional;
 public class UsuarioUseCase {
 
     private final UsuarioGateway usuarioGateway;
+    private final EncrypterGateway encrypterGateway;
 
     public Usuario guardar(Usuario usuario) {
         UsuarioValidator.validar(usuario);
+
+        String claveEncrypt = encrypterGateway.encrypt(usuario.getClave());
+        usuario.setClave(claveEncrypt);
+
         return usuarioGateway.guardar(usuario);
     }
+
 
     public Usuario buscarPorId(Long id) {
         UsuarioValidator.validarId(id);
@@ -28,6 +34,7 @@ public class UsuarioUseCase {
     public Usuario actualizarUsuario(Usuario usuario) {
         UsuarioValidator.validarActualizacion(usuario);
         buscarPorId(usuario.getIdUsuario());
+        usuario.setClave(encrypterGateway.encrypt(usuario.getClave()));
         return usuarioGateway.actualizarUsuario(usuario);
     }
 
@@ -48,12 +55,10 @@ public class UsuarioUseCase {
             return "Usuario no encontrado";
         }
 
-        if (usuarioLogueo.getClave().equals(password)) {
+        if (encrypterGateway.checkPass(password, usuarioLogueo.getClave())) {
             return "Credenciales Validas";
         } else {
             return "Credenciales Invalidas";
         }
     }
-
-
 }

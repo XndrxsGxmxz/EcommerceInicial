@@ -3,6 +3,7 @@ package com.ecommerce.auth.infraestructure.entry_points;
 import com.ecommerce.auth.domain.model.Usuario;
 import com.ecommerce.auth.domain.usecase.UsuarioUseCase;
 import com.ecommerce.auth.infraestructure.driver_adapters.UsuarioData;
+import com.ecommerce.auth.infraestructure.mapper.MapperUsuario;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,19 +12,24 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(path = "/api/usuarios")
+@RequiredArgsConstructor
 
 
 public class UsuarioRestController {
     private final UsuarioUseCase usuarioUseCase;
+    private final MapperUsuario mapperUsuario;
 
-
-    public UsuarioRestController(UsuarioUseCase usuarioUseCase) {
-        this.usuarioUseCase = usuarioUseCase;
-    }
 
     @PostMapping("/save")
-    public Usuario guardar(@RequestBody Usuario usuario) {
-        return usuarioUseCase.guardar(usuario);
+    public ResponseEntity<Usuario> saveUsuario(@RequestBody UsuarioData usuarioData){
+        Usuario usuario = mapperUsuario.toUsuario(usuarioData);
+        Usuario usuarioValidadoGuardado = usuarioUseCase.guardar(usuario);
+
+        if(usuarioValidadoGuardado.getIdUsuario() != null){
+            return new ResponseEntity<>(usuarioValidadoGuardado, HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(usuarioValidadoGuardado, HttpStatus.CONFLICT);
     }
 
     @GetMapping("/{id}")
