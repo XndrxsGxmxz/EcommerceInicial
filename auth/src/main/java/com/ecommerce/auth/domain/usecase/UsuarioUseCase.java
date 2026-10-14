@@ -58,7 +58,7 @@ public class UsuarioUseCase {
         if (encrypterGateway.checkPass(password, usuarioLogueo.getClave())) {
             return "Credenciales Validas";
         } else {
-            return "Credenciales Invalidas revise eso perrito";
+            return "Credenciales Invalidas mire bien";
 
 
         }
