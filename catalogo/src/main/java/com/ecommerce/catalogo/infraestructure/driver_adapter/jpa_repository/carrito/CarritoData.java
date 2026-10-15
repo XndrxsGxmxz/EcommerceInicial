@@ -1,5 +1,6 @@
 package com.ecommerce.catalogo.infraestructure.driver_adapter.jpa_repository.carrito;
 
+import com.ecommerce.catalogo.infraestructure.driver_adapter.jpa_repository.itemcarrito.ItemCarritoData;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

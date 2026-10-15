@@ -2,6 +2,7 @@ package com.ecommerce.catalogo.infraestructure.driver_adapter.jpa_repository.car
 
 import com.ecommerce.catalogo.domain.model.Carrito;
 import com.ecommerce.catalogo.domain.model.gateway.CarritoGateway;
+import com.ecommerce.catalogo.infraestructure.mapper.MapperCarrito;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
