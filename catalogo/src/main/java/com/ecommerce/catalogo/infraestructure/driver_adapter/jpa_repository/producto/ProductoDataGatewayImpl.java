@@ -1,4 +1,7 @@
+import com.ecommerce.catalogo.domain.model.Producto;
 import com.ecommerce.catalogo.domain.model.gateway.ProductoGateway;
+import com.ecommerce.catalogo.infraestructure.driver_adapter.jpa_repository.producto.ProductoDataJpaRepository;
+import com.ecommerce.catalogo.infraestructure.mapper.MapperProducto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
