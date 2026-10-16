@@ -16,15 +16,12 @@ public class UsuarioUseCase {
     private final UsuarioGateway usuarioGateway;
     private final EncrypterGateway encrypterGateway;
 
-    // ---------- CRUD general (no permite fijar ni modificar el saldo) ----------
-
     public Usuario guardar(Usuario usuario) {
-        UsuarioValidator.validar(usuario);          // rechaza saldo distinto de 0
+        UsuarioValidator.validar(usuario);
 
         String claveEncrypt = encrypterGateway.encrypt(usuario.getClave());
         usuario.setClave(claveEncrypt);
-        usuario.setSaldo(BigDecimal.ZERO);          // saldo inicial $0
-
+        usuario.setSaldo(BigDecimal.ZERO);
         return usuarioGateway.guardar(usuario);
     }
 
@@ -39,7 +36,7 @@ public class UsuarioUseCase {
         Usuario existente = buscarPorId(usuario.getIdUsuario());
 
         usuario.setClave(encrypterGateway.encrypt(usuario.getClave()));
-        usuario.setSaldo(existente.getSaldo());     // el CRUD conserva el saldo actual
+        usuario.setSaldo(existente.getSaldo());
 
         return usuarioGateway.actualizarUsuario(usuario);
     }
@@ -68,27 +65,23 @@ public class UsuarioUseCase {
         }
     }
 
-    // ---------- Operaciones de saldo (con controles de negocio) ----------
 
     public BigDecimal consultarSaldo(Long idUsuario) {
         return buscarPorId(idUsuario).getSaldo();
     }
 
-    /** Operación autorizada: asigna un saldo específico (ej. saldo inicial distinto de 0). */
     public Usuario asignarSaldo(Long idUsuario, BigDecimal saldo) {
         UsuarioValidator.validarSaldoAsignado(saldo);
         buscarPorId(idUsuario);
         return usuarioGateway.actualizarSaldo(idUsuario, saldo);
     }
 
-    /** Recarga: suma el monto al saldo actual. */
     public Usuario recargarSaldo(Long idUsuario, BigDecimal monto) {
         UsuarioValidator.validarMontoRecarga(monto);
         Usuario existente = buscarPorId(idUsuario);
         return usuarioGateway.actualizarSaldo(idUsuario, existente.getSaldo().add(monto));
     }
 
-    /** Descuento: SOLO debe invocarse al confirmar una compra válida. */
     public Usuario descontarSaldoPorCompra(Long idUsuario, BigDecimal monto) {
         Usuario existente = buscarPorId(idUsuario);
         UsuarioValidator.validarDescuento(existente.getSaldo(), monto);
