@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/ecommerce/carrito")
 @RequiredArgsConstructor
-
 public class CarritoController {
     private final CarritoUseCase carritoUseCase;
 
@@ -31,13 +30,8 @@ public class CarritoController {
         return ResponseEntity.ok(carritoUseCase.eliminarProductoDelCarrito(usuarioId, productoId));
     }
 
-    @PostMapping("venta/{usuarioId}")
+    @PostMapping("/venta/{usuarioId}")
     public ResponseEntity<String> realizarVenta(@PathVariable Long usuarioId) {
-        try {
-            String mensaje = carritoUseCase.realizarVenta(usuarioId);
-            return ResponseEntity.ok(mensaje);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body("Error al realizar la venta: " + e.getMessage());
-        }
+        return ResponseEntity.ok(carritoUseCase.realizarVenta(usuarioId));
     }
 }

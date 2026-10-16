@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+
 
 @RestController
 @RequestMapping(path = "/api/usuarios")
@@ -60,5 +62,24 @@ public class UsuarioRestController {
         } catch (Exception error){
             return new ResponseEntity<>("Falló el logueo", HttpStatus.CONFLICT);
         }
+    }
+    @GetMapping("/{id}/saldo")
+    public ResponseEntity<BigDecimal> consultarSaldo(@PathVariable Long id) {
+        return ResponseEntity.ok(usuarioUseCase.consultarSaldo(id));
+    }
+
+    @PutMapping("/{id}/saldo/recargar")
+    public ResponseEntity<BigDecimal> recargar(@PathVariable Long id, @RequestBody MontoRequest request) {
+        return ResponseEntity.ok(usuarioUseCase.recargarSaldo(id, request.getMonto()).getSaldo());
+    }
+
+    @PutMapping("/{id}/saldo")
+    public ResponseEntity<BigDecimal> asignar(@PathVariable Long id, @RequestBody MontoRequest request) {
+        return ResponseEntity.ok(usuarioUseCase.asignarSaldo(id, request.getMonto()).getSaldo());
+    }
+
+    @PostMapping("/{id}/saldo/descontar")
+    public ResponseEntity<BigDecimal> descontar(@PathVariable Long id, @RequestBody MontoRequest request) {
+        return ResponseEntity.ok(usuarioUseCase.descontarSaldo(id, request.getMonto()).getSaldo());
     }
 }

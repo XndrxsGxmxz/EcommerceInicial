@@ -1,6 +1,5 @@
 package com.ecommerce.catalogo.infraestructure.driver_adapter.external_repository;
 
-import com.ecommerce.catalogo.domain.exception.ServicioExternoNoDisponibleException;
 import com.ecommerce.catalogo.domain.model.gateway.UsuarioGateway;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,8 +24,6 @@ public class UsuarioGatewayImpl implements UsuarioGateway {
             return true;
         } catch (HttpClientErrorException.NotFound e) {
             return false;
-        } catch (RestClientException e) {
-            throw new ServicioExternoNoDisponibleException("Auth", e);
         }
     }
 }
