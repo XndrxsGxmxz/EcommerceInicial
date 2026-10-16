@@ -62,28 +62,27 @@ public final class UsuarioValidator {
         lanzarSiHayErrores(Stream.of(idValido(id)));
     }
 
-    // ---------- Validaciones de operaciones de saldo ----------
 
-    /** Asignación de un saldo por una operación autorizada. */
+
+
     public static void validarSaldoAsignado(BigDecimal saldo) {
         lanzarSiHayErrores(Stream.of(
                 requeridoNumero(saldo, "El saldo"),
                 saldoNoNegativo(saldo)));
     }
 
-    /** Recarga: el monto debe existir y ser mayor que cero. */
+
     public static void validarMontoRecarga(BigDecimal monto) {
         lanzarSiHayErrores(Stream.of(montoPositivo(monto, "El monto de la recarga")));
     }
 
-    /** Descuento por compra confirmada: monto válido y saldo suficiente. */
+
     public static void validarDescuento(BigDecimal saldoActual, BigDecimal monto) {
         lanzarSiHayErrores(Stream.of(
                 montoPositivo(monto, "El monto de la compra"),
                 saldoSuficiente(saldoActual, monto)));
     }
 
-    // ---------- Motor de reglas ----------
 
     private static void ejecutarReglas(List<Function<Usuario, Optional<String>>> reglas, Usuario usuario) {
         lanzarSiHayErrores(reglas.stream().map(regla -> regla.apply(usuario)));
@@ -99,7 +98,6 @@ public final class UsuarioValidator {
                 .ifPresent(lista -> { throw new UsuarioInvalidoException(lista); });
     }
 
-    // ---------- Reglas individuales ----------
 
     private static Optional<String> requerido(String valor, String etiqueta) {
         return Optional.of(Optional.ofNullable(valor).orElse(""))
