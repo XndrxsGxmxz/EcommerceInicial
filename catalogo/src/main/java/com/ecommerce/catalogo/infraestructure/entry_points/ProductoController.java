@@ -38,4 +38,9 @@ public class ProductoController {
         useCase.eliminarProducto(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Producto> actualizar(@PathVariable Long id, @RequestBody Producto producto) {
+        return ResponseEntity.ok(useCase.actualizarProducto(id, producto));
+    }
 }

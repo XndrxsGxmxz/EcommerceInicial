@@ -1,5 +1,6 @@
 package com.ecommerce.catalogo.infraestructure.driver_adapter.jpa_repository.producto;
 
+import com.ecommerce.catalogo.domain.exception.ProductoNoEncontradoException;
 import com.ecommerce.catalogo.domain.model.Producto;
 import com.ecommerce.catalogo.domain.model.gateway.ProductoGateway;
 import com.ecommerce.catalogo.infraestructure.mapper.MapperProducto;
@@ -27,7 +28,7 @@ public class ProductoDataGatewayImpl implements ProductoGateway {
     public Producto buscarPorId(Long id) {
         return repository.findById(id)
                 .map(mapper::toProducto)
-                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+                .orElseThrow(() -> new ProductoNoEncontradoException(id));
     }
 
 

@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 @RequiredArgsConstructor
@@ -23,8 +24,6 @@ public class UsuarioGatewayImpl implements UsuarioGateway {
             return true;
         } catch (HttpClientErrorException.NotFound e) {
             return false;
-        } catch (Exception errorMensaje) {
-            throw new RuntimeException("Error al consultar el servicio de autenticación", errorMensaje);
         }
     }
 }

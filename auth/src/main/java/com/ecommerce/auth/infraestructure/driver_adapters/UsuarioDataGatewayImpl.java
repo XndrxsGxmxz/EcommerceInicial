@@ -1,5 +1,6 @@
 package com.ecommerce.auth.infraestructure.driver_adapters;
 
+import com.ecommerce.auth.domain.exception.UsuarioNoEncontradoException;
 import com.ecommerce.auth.domain.model.Usuario;
 import com.ecommerce.auth.domain.model.gateway.UsuarioGateway;
 import com.ecommerce.auth.infraestructure.mapper.MapperUsuario;
@@ -49,7 +50,10 @@ public class UsuarioDataGatewayImpl implements UsuarioGateway {
 
     @Override
     public Usuario actualizarSaldo(Long idUsuario, BigDecimal saldo) {
-        return null;
+        UsuarioData data = repository.findById(idUsuario)
+                .orElseThrow(() -> new UsuarioNoEncontradoException(idUsuario));
+        data.setSaldo(saldo);
+        return mapperUsuario.toUsuario(repository.save(data));
     }
 
 }

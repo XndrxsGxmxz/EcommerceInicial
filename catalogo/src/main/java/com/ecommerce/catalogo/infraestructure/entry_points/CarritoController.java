@@ -12,17 +12,12 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/ecommerce/carrito")
 @RequiredArgsConstructor
-
 public class CarritoController {
     private final CarritoUseCase carritoUseCase;
 
     @PostMapping("/agregar")
     public ResponseEntity<Carrito> agregarItem(@RequestParam Long usuarioId, @RequestBody ItemCarrito item) {
-        try {
-            return ResponseEntity.ok(carritoUseCase.agregarProductoAlCarrito(usuarioId, item));
-        }catch (UsuarioNoEncontradoException exception){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
+        return ResponseEntity.ok(carritoUseCase.agregarProductoAlCarrito(usuarioId, item));
     }
 
     @GetMapping
@@ -31,25 +26,13 @@ public class CarritoController {
     }
 
     @DeleteMapping("/eliminar/{productoId}")
-    public ResponseEntity<Carrito> eliminarItemDelCarrito(
-            @RequestParam Long usuarioId,
-            @PathVariable Long productoId
-    ) {
-        try {
-            Carrito carritoActualizado = carritoUseCase.eliminarProductoDelCarrito(usuarioId, productoId);
-            return ResponseEntity.ok(carritoActualizado);
-        }catch (CarritoNoFoundException errorMessage){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
+    public ResponseEntity<Carrito> eliminarItemDelCarrito(@RequestParam Long usuarioId,
+                                                          @PathVariable Long productoId) {
+        return ResponseEntity.ok(carritoUseCase.eliminarProductoDelCarrito(usuarioId, productoId));
     }
 
-    @PostMapping("venta/{usuarioId}")
+    @PostMapping("/venta/{usuarioId}")
     public ResponseEntity<String> realizarVenta(@PathVariable Long usuarioId) {
-        try {
-            String mensaje = carritoUseCase.realizarVenta(usuarioId);
-            return ResponseEntity.ok(mensaje);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body("Error al realizar la venta: " + e.getMessage());
-        }
+        return ResponseEntity.ok(carritoUseCase.realizarVenta(usuarioId));
     }
 }
