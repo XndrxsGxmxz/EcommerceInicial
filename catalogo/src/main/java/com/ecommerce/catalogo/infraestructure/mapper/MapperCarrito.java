@@ -14,7 +14,7 @@ public class MapperCarrito {
     public CarritoData toData(Carrito carrito) {
         CarritoData carritoData = new CarritoData();
         carritoData.setIdCarrito(carrito.getId());
-        carritoData.setUsuarioId(carrito.getIdUsuario());
+        carritoData.setUsuarioId(carrito.getUsuarioId());
         carritoData.setPrecioTotal(carrito.getPreciototal());
 
         List<ItemCarritoData> items = carrito.getItems().stream()
@@ -37,7 +37,7 @@ public class MapperCarrito {
     public Carrito toDomain(CarritoData carritoData) {
         Carrito carrito = new Carrito();
         carrito.setId(carritoData.getIdCarrito());
-        carrito.setIdUsuario(carritoData.getUsuarioId());
+        carrito.setUsuarioId(carritoData.getUsuarioId());
         carrito.setPreciototal(carritoData.getPrecioTotal());
 
         List<ItemCarrito> items = carritoData.getItems().stream()

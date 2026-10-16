@@ -39,7 +39,7 @@ public class CarritoUseCase {
 
         if (carrito == null) {
             carrito = new Carrito();
-            carrito.setIdUsuario(usuarioId);
+            carrito.setUsuarioId(usuarioId);
             carrito.setItems(new ArrayList<>());
         }
 

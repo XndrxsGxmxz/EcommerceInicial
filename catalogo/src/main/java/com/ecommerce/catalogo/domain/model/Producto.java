@@ -11,10 +11,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Producto {
-    private long id;
+    private Long id;
     private String nombre;
-    private  String descripcion;
-    private double precio;
-    private int stock;
+    private String descripcion;
+    private Double precio;
+    private Integer stock;
     private String imagen;
 }

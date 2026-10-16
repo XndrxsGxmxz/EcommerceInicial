@@ -13,8 +13,8 @@ import java.util.List;
 
 
 public class Carrito {
-    private long id;
-    private long idUsuario;
+    private Long id;
+    private Long usuarioId;
     private List<ItemCarrito> items;
-    private double preciototal;
+    private Double preciototal;
 }

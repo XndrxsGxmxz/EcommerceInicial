@@ -1,4 +1,4 @@
-package com.ecommerce.catalogo.application;
+package com.ecommerce.catalogo.application.config;
 
 
 import com.ecommerce.catalogo.domain.model.gateway.CarritoGateway;

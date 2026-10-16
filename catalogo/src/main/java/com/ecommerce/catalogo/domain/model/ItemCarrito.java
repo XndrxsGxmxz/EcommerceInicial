@@ -10,11 +10,11 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ItemCarrito {
-    private long id;
-    private long carritoid;
-    private long productoId;
+    private Long id;
+    private Long carritoid;
+    private Long productoId;
     private String nombreProducto;
-    private double precioUnitario;
-    private int cantidad;
-    private double subtotal;
+    private Double precioUnitario;
+    private Integer cantidad;
+    private Double subtotal;
 }
