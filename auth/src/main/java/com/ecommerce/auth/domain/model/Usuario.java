@@ -2,6 +2,8 @@ package com.ecommerce.auth.domain.model;
 
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -16,4 +18,5 @@ public class Usuario {
     private String rol;
     private String numeroTelefonico;
     private Integer edad;
+    private BigDecimal saldo;
 }

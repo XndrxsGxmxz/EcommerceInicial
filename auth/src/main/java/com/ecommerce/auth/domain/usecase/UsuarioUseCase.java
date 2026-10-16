@@ -7,6 +7,7 @@ import com.ecommerce.auth.domain.model.gateway.UsuarioGateway;
 import com.ecommerce.auth.domain.usecase.validation.UsuarioValidator;
 import lombok.RequiredArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -20,10 +21,9 @@ public class UsuarioUseCase {
 
         String claveEncrypt = encrypterGateway.encrypt(usuario.getClave());
         usuario.setClave(claveEncrypt);
-
+        usuario.setSaldo(BigDecimal.ZERO);
         return usuarioGateway.guardar(usuario);
     }
-
 
     public Usuario buscarPorId(Long id) {
         UsuarioValidator.validarId(id);
@@ -33,8 +33,11 @@ public class UsuarioUseCase {
 
     public Usuario actualizarUsuario(Usuario usuario) {
         UsuarioValidator.validarActualizacion(usuario);
-        buscarPorId(usuario.getIdUsuario());
+        Usuario existente = buscarPorId(usuario.getIdUsuario());
+
         usuario.setClave(encrypterGateway.encrypt(usuario.getClave()));
+        usuario.setSaldo(existente.getSaldo());
+
         return usuarioGateway.actualizarUsuario(usuario);
     }
 
@@ -59,8 +62,9 @@ public class UsuarioUseCase {
             return "Credenciales Validas";
         } else {
             return "Credenciales Invalidas revisar porfavor";
-
-
         }
     }
+
+
+
 }

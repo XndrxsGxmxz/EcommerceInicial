@@ -2,7 +2,9 @@ package com.ecommerce.catalogo.infraestructure.mapper;
 
 import com.ecommerce.catalogo.domain.model.Producto;
 import com.ecommerce.catalogo.infraestructure.driver_adapter.jpa_repository.producto.ProductoData;
+import org.springframework.stereotype.Component;
 
+@Component
 public class MapperProducto {
     public Producto toProducto(ProductoData data) {
         return new Producto(

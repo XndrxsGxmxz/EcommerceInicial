@@ -6,6 +6,8 @@ import com.ecommerce.auth.infraestructure.mapper.MapperUsuario;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
+
 @Repository
 @RequiredArgsConstructor
 public class UsuarioDataGatewayImpl implements UsuarioGateway {
@@ -43,6 +45,11 @@ public class UsuarioDataGatewayImpl implements UsuarioGateway {
         return repository.findByCorreo(correo)
                 .map(mapperUsuario::toUsuario)
                 .orElse(null);
+    }
+
+    @Override
+    public Usuario actualizarSaldo(Long idUsuario, BigDecimal saldo) {
+        return null;
     }
 
 }
