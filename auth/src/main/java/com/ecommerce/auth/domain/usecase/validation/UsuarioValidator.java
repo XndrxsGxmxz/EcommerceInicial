@@ -3,6 +3,7 @@ package com.ecommerce.auth.domain.usecase.validation;
 import com.ecommerce.auth.domain.exception.UsuarioInvalidoException;
 import com.ecommerce.auth.domain.model.Usuario;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -29,7 +30,12 @@ public final class UsuarioValidator {
             u -> claveSegura(u.getClave()),
             u -> rolValido(u.getRol()),
             u -> formatoValido(u.getNumeroTelefonico(), TELEFONO_REGEX, "El número telefónico es inválido"),
-            u -> edadValida(u.getEdad())
+            u -> edadValida(u.getEdad()),
+            u -> saldoNoNegativo(u.getSaldo())
+    );
+
+    private static final List<Function<Usuario, Optional<String>>> REGLAS_CREACION = List.of(
+            u -> saldoInicialPorDefecto(u.getSaldo())
     );
 
     private static final List<Function<Usuario, Optional<String>>> REGLA_ID = List.of(
@@ -38,8 +44,12 @@ public final class UsuarioValidator {
 
     private UsuarioValidator() {}
 
+
+
     public static void validar(Usuario usuario) {
-        ejecutarReglas(REGLAS_DATOS, usuario);
+        List<Function<Usuario, Optional<String>>> reglasCreacion =
+                Stream.concat(REGLAS_DATOS.stream(), REGLAS_CREACION.stream()).toList();
+        ejecutarReglas(reglasCreacion, usuario);
     }
 
     public static void validarActualizacion(Usuario usuario) {
@@ -49,15 +59,38 @@ public final class UsuarioValidator {
     }
 
     public static void validarId(Long id) {
-        Optional.of(idValido(id))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .ifPresent(mensaje -> { throw new UsuarioInvalidoException(List.of(mensaje)); });
+        lanzarSiHayErrores(Stream.of(idValido(id)));
     }
 
+    // ---------- Validaciones de operaciones de saldo ----------
+
+    /** Asignación de un saldo por una operación autorizada. */
+    public static void validarSaldoAsignado(BigDecimal saldo) {
+        lanzarSiHayErrores(Stream.of(
+                requeridoNumero(saldo, "El saldo"),
+                saldoNoNegativo(saldo)));
+    }
+
+    /** Recarga: el monto debe existir y ser mayor que cero. */
+    public static void validarMontoRecarga(BigDecimal monto) {
+        lanzarSiHayErrores(Stream.of(montoPositivo(monto, "El monto de la recarga")));
+    }
+
+    /** Descuento por compra confirmada: monto válido y saldo suficiente. */
+    public static void validarDescuento(BigDecimal saldoActual, BigDecimal monto) {
+        lanzarSiHayErrores(Stream.of(
+                montoPositivo(monto, "El monto de la compra"),
+                saldoSuficiente(saldoActual, monto)));
+    }
+
+    // ---------- Motor de reglas ----------
+
     private static void ejecutarReglas(List<Function<Usuario, Optional<String>>> reglas, Usuario usuario) {
-        List<String> errores = reglas.stream()
-                .map(regla -> regla.apply(usuario))
+        lanzarSiHayErrores(reglas.stream().map(regla -> regla.apply(usuario)));
+    }
+
+    private static void lanzarSiHayErrores(Stream<Optional<String>> resultados) {
+        List<String> errores = resultados
                 .flatMap(Optional::stream)
                 .toList();
 
@@ -66,10 +99,18 @@ public final class UsuarioValidator {
                 .ifPresent(lista -> { throw new UsuarioInvalidoException(lista); });
     }
 
+    // ---------- Reglas individuales ----------
+
     private static Optional<String> requerido(String valor, String etiqueta) {
         return Optional.of(Optional.ofNullable(valor).orElse(""))
                 .map(String::trim)
                 .filter(String::isEmpty)
+                .map(v -> etiqueta + " es obligatorio");
+    }
+
+    private static Optional<String> requeridoNumero(BigDecimal valor, String etiqueta) {
+        return Optional.of(Optional.ofNullable(valor).isEmpty())
+                .filter(esNulo -> esNulo)
                 .map(v -> etiqueta + " es obligatorio");
     }
 
@@ -109,5 +150,29 @@ public final class UsuarioValidator {
         return Optional.of(Optional.ofNullable(edad).orElse(0))
                 .filter(e -> e < EDAD_MINIMA)
                 .map(e -> "El usuario debe ser mayor o igual a " + EDAD_MINIMA + " años");
+    }
+
+    private static Optional<String> saldoNoNegativo(BigDecimal saldo) {
+        return Optional.ofNullable(saldo)
+                .filter(s -> s.signum() < 0)
+                .map(s -> "El saldo no puede ser negativo");
+    }
+
+    private static Optional<String> saldoInicialPorDefecto(BigDecimal saldo) {
+        return Optional.ofNullable(saldo)
+                .filter(s -> s.signum() != 0)
+                .map(s -> "El saldo inicial es $0; para asignar otro valor use la operación autorizada de saldo");
+    }
+
+    private static Optional<String> montoPositivo(BigDecimal monto, String etiqueta) {
+        return Optional.of(Optional.ofNullable(monto).orElse(BigDecimal.ZERO))
+                .filter(m -> m.signum() <= 0)
+                .map(m -> etiqueta + " es obligatorio y debe ser mayor que cero");
+    }
+
+    private static Optional<String> saldoSuficiente(BigDecimal saldoActual, BigDecimal monto) {
+        return Optional.ofNullable(monto)
+                .filter(m -> Optional.ofNullable(saldoActual).orElse(BigDecimal.ZERO).compareTo(m) < 0)
+                .map(m -> "Saldo insuficiente para completar la compra");
     }
 }
