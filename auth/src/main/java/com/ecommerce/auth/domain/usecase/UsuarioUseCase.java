@@ -64,6 +64,35 @@ public class UsuarioUseCase {
             return "Credenciales Invalidas revisar porfavor";
         }
     }
+    public BigDecimal consultarSaldo(Long id) {
+        return saldoDe(buscarPorId(id));
+    }
+
+    public Usuario recargarSaldo(Long id, BigDecimal monto) {
+        UsuarioValidator.validarId(id);
+        UsuarioValidator.validarMontoRecarga(monto);
+        Usuario usuario = buscarPorId(id);
+        return usuarioGateway.actualizarSaldo(id, saldoDe(usuario).add(monto));
+    }
+
+    public Usuario asignarSaldo(Long id, BigDecimal saldo) {
+        UsuarioValidator.validarId(id);
+        UsuarioValidator.validarSaldoAsignado(saldo);
+        buscarPorId(id);
+        return usuarioGateway.actualizarSaldo(id, saldo);
+    }
+
+    public Usuario descontarSaldo(Long id, BigDecimal monto) {
+        UsuarioValidator.validarId(id);
+        Usuario usuario = buscarPorId(id);
+        BigDecimal saldoActual = saldoDe(usuario);
+        UsuarioValidator.validarDescuento(saldoActual, monto);
+        return usuarioGateway.actualizarSaldo(id, saldoActual.subtract(monto));
+    }
+
+    private BigDecimal saldoDe(Usuario usuario) {
+        return Optional.ofNullable(usuario.getSaldo()).orElse(BigDecimal.ZERO);
+    }
 
 
 

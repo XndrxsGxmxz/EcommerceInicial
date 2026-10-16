@@ -3,6 +3,7 @@ package com.ecommerce.catalogo.infraestructure.driver_adapter.jpa_repository.car
 import com.ecommerce.catalogo.domain.model.Carrito;
 import com.ecommerce.catalogo.domain.model.gateway.CarritoGateway;
 import com.ecommerce.catalogo.infraestructure.mapper.MapperCarrito;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -27,6 +28,7 @@ public class CarritoDataGatewayImpl implements CarritoGateway {
     }
 
     @Override
+    @Transactional
     public void eliminarCarritoByUsuarioId(Long usuarioId) {
         repository.deleteByUsuarioId(usuarioId);
     }
