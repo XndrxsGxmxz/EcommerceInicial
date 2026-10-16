@@ -1,7 +1,7 @@
 package com.ecommerce.catalogo.domain.exception;
 
-public class UsuarioNoEncontradoException extends RuntimeException {
-    public UsuarioNoEncontradoException(String message) {
-        super(message);
+public class UsuarioNoEncontradoException extends RecursoNoEncontradoException {
+    public UsuarioNoEncontradoException(Long id) {
+        super("No se encontró el usuario con id: " + id);
     }
 }

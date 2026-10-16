@@ -1,5 +1,6 @@
 package com.ecommerce.catalogo.domain.usecase;
 
+import com.ecommerce.catalogo.domain.exception.ProductoNoEncontradoException;
 import com.ecommerce.catalogo.domain.model.Producto;
 import com.ecommerce.catalogo.domain.model.gateway.ProductoGateway;
 import lombok.RequiredArgsConstructor;
@@ -18,12 +19,8 @@ public class ProductoUseCase {
 
 
     public Producto obtenerProducto(Long id) {
-        try {
-            return productoGateway.buscarPorId(id);
-        }catch (Exception e){
-            System.out.println(e.getMessage());
-            return new Producto();
-        }
+        return productoGateway.buscarPorId(id)
+                .orElseThrow(() -> new ProductoNoEncontradoException(id));
     }
 
 

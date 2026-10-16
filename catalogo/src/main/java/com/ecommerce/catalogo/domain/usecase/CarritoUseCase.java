@@ -1,6 +1,6 @@
 package com.ecommerce.catalogo.domain.usecase;
 
-import com.ecommerce.catalogo.domain.exception.CarritoNoFoundException;
+import com.ecommerce.catalogo.domain.exception.CarritoNoEncontradoException;
 import com.ecommerce.catalogo.domain.exception.UsuarioNoEncontradoException;
 import com.ecommerce.catalogo.domain.model.Carrito;
 import com.ecommerce.catalogo.domain.model.ItemCarrito;
@@ -25,7 +25,7 @@ public class CarritoUseCase {
     public Carrito agregarProductoAlCarrito(Long usuarioId, ItemCarrito itemCarrito) {
 
         if (!usuarioGateway.usuarioExiste(usuarioId)) {
-            throw new UsuarioNoEncontradoException("Usuario no encontrado con ID: " + usuarioId);
+            throw new UsuarioNoEncontradoException(usuarioId);
         }
 
         Producto producto = productoUseCase.obtenerProducto(itemCarrito.getProductoId());
@@ -75,7 +75,7 @@ public class CarritoUseCase {
         Carrito carrito = carritoGateway.buscarPorUsuarioId(usuarioId);
 
         if (carrito == null) {
-            throw new CarritoNoFoundException("Carrito no encontrado para el usuario ID: " + usuarioId);
+            throw new CarritoNoEncontradoException(usuarioId);
         }
 
         List<ItemCarrito> itemsFiltrados = carrito.getItems()

@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository
@@ -24,10 +25,8 @@ public class ProductoDataGatewayImpl implements ProductoGateway {
 
 
     @Override
-    public Producto buscarPorId(Long id) {
-        return repository.findById(id)
-                .map(mapper::toProducto)
-                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+    public Optional<Producto> buscarPorId(Long id) {
+        return repository.findById(id).map(mapper::toProducto);
     }
 
 
