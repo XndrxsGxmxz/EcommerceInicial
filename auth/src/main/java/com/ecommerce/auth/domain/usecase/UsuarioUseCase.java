@@ -66,25 +66,5 @@ public class UsuarioUseCase {
     }
 
 
-    public BigDecimal consultarSaldo(Long idUsuario) {
-        return buscarPorId(idUsuario).getSaldo();
-    }
 
-    public Usuario asignarSaldo(Long idUsuario, BigDecimal saldo) {
-        UsuarioValidator.validarSaldoAsignado(saldo);
-        buscarPorId(idUsuario);
-        return usuarioGateway.actualizarSaldo(idUsuario, saldo);
-    }
-
-    public Usuario recargarSaldo(Long idUsuario, BigDecimal monto) {
-        UsuarioValidator.validarMontoRecarga(monto);
-        Usuario existente = buscarPorId(idUsuario);
-        return usuarioGateway.actualizarSaldo(idUsuario, existente.getSaldo().add(monto));
-    }
-
-    public Usuario descontarSaldoPorCompra(Long idUsuario, BigDecimal monto) {
-        Usuario existente = buscarPorId(idUsuario);
-        UsuarioValidator.validarDescuento(existente.getSaldo(), monto);
-        return usuarioGateway.actualizarSaldo(idUsuario, existente.getSaldo().subtract(monto));
-    }
 }
