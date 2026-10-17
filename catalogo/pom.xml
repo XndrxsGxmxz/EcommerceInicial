@@ -12,12 +12,10 @@
 	<artifactId>catalogo</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>catalogo</name>
-	<description>Microservicio de catalogo y carrito de compras</description>
-
+	<description>Microservicio de catalogo y carrito</description>
 	<properties>
-		<java.version>25</java.version>
+		<java.version>17</java.version>
 	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

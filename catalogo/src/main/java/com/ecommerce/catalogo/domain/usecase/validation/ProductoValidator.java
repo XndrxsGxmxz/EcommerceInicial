@@ -18,7 +18,7 @@ public final class ProductoValidator {
 
         if (producto.getNombre() == null || producto.getNombre().isBlank())
             errores.add("El nombre es obligatorio");
-        if (producto.getPrecio() == null || producto.getPrecio() <= 0)
+        if (producto.getPrecio() == null || producto.getPrecio().signum() <= 0)
             errores.add("El precio es obligatorio y debe ser mayor que cero");
         if (producto.getStock() == null || producto.getStock() < 0)
             errores.add("El stock es obligatorio y no puede ser negativo");

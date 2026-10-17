@@ -16,6 +16,7 @@ public class MapperCarrito {
         carritoData.setIdCarrito(carrito.getId());
         carritoData.setUsuarioId(carrito.getUsuarioId());
         carritoData.setPrecioTotal(carrito.getPreciototal());
+        carritoData.setComprado(carrito.isComprado());
 
         List<ItemCarritoData> items = carrito.getItems().stream()
                 .map(item -> {
@@ -39,6 +40,7 @@ public class MapperCarrito {
         carrito.setId(carritoData.getIdCarrito());
         carrito.setUsuarioId(carritoData.getUsuarioId());
         carrito.setPreciototal(carritoData.getPrecioTotal());
+        carrito.setComprado(carritoData.isComprado());
 
         List<ItemCarrito> items = carritoData.getItems().stream()
                 .map(itemData -> {
