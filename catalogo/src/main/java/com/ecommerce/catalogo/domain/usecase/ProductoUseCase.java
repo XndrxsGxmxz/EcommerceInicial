@@ -18,12 +18,7 @@ public class ProductoUseCase {
 
 
     public Producto obtenerProducto(Long id) {
-        try {
-            return productoGateway.buscarPorId(id);
-        }catch (Exception e){
-            System.out.println(e.getMessage());
-            return new Producto();
-        }
+        return productoGateway.buscarPorId(id);
     }
 
 

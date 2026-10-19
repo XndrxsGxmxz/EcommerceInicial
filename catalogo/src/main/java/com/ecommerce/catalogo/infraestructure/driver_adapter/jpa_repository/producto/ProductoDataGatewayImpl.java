@@ -27,7 +27,7 @@ public class ProductoDataGatewayImpl implements ProductoGateway {
     public Producto buscarPorId(Long id) {
         return repository.findById(id)
                 .map(mapper::toProducto)
-                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + id));
     }
 
 

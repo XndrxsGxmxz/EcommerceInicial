@@ -23,7 +23,11 @@ public class ProductoController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Producto> obtenerPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(useCase.obtenerProducto(id));
+        try {
+            return ResponseEntity.ok(useCase.obtenerProducto(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
 

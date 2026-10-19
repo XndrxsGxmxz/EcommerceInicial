@@ -8,6 +8,7 @@ import com.ecommerce.catalogo.domain.model.Producto;
 import com.ecommerce.catalogo.domain.model.gateway.CarritoGateway;
 import com.ecommerce.catalogo.domain.model.gateway.UsuarioGateway;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,6 +95,7 @@ public class CarritoUseCase {
         return carritoGateway.guardar(carrito);
     }
 
+    @Transactional
     public String realizarVenta(Long usuarioId) {
         Carrito carrito = carritoGateway.buscarPorUsuarioId(usuarioId);
 

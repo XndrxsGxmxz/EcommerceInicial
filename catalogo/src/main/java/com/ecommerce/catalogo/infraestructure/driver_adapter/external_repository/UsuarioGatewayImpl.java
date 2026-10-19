@@ -15,7 +15,7 @@ public class UsuarioGatewayImpl implements UsuarioGateway {
     @Override
     public boolean usuarioExiste(Long usuarioId) {
         try {
-            restTemplate.getForEntity("http://localhost:9090/api/ecommerce/usuario/" + usuarioId, Void.class);
+            restTemplate.getForEntity("http://localhost:8080/api/usuarios/" + usuarioId, Void.class);
             return true;
         } catch (HttpClientErrorException.NotFound e) {
             return false;
