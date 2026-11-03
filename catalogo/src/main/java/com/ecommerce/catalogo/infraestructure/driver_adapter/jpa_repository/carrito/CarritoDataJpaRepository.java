@@ -6,6 +6,5 @@ import java.util.Optional;
 
 public interface CarritoDataJpaRepository extends JpaRepository<CarritoData, Long> {
 
-    Optional<CarritoData> findByUsuarioId(Long usuarioId);
-    void deleteByUsuarioId(Long usuarioId);
+    Optional<CarritoData> findByUsuarioIdAndComprado(Long usuarioId, boolean comprado);
 }

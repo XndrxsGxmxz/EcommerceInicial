@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Setter
 @Getter
 @AllArgsConstructor
@@ -14,7 +16,7 @@ public class ItemCarrito {
     private Long carritoid;
     private Long productoId;
     private String nombreProducto;
-    private Double precioUnitario;
+    private BigDecimal precioUnitario;
     private Integer cantidad;
-    private Double subtotal;
+    private BigDecimal subtotal;
 }

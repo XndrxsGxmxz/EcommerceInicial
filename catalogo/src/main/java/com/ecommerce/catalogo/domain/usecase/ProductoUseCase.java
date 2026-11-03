@@ -1,5 +1,6 @@
 package com.ecommerce.catalogo.domain.usecase;
 
+import com.ecommerce.catalogo.domain.exception.ProductoNoEncontradoException;
 import com.ecommerce.catalogo.domain.model.Producto;
 import com.ecommerce.catalogo.domain.model.gateway.ProductoGateway;
 import com.ecommerce.catalogo.domain.usecase.validation.ProductoValidator;
@@ -19,7 +20,8 @@ public class ProductoUseCase {
 
     public Producto obtenerProducto(Long id) {
         ProductoValidator.validarId(id);
-        return productoGateway.buscarPorId(id);
+        return productoGateway.buscarPorId(id)
+                .orElseThrow(() -> new ProductoNoEncontradoException(id));
     }
 
     public List<Producto> obtenerTodos() {
@@ -27,14 +29,14 @@ public class ProductoUseCase {
     }
 
     public void eliminarProducto(Long id) {
-        ProductoValidator.validarId(id);
-        productoGateway.buscarPorId(id);
+        obtenerProducto(id);
         productoGateway.eliminar(id);
     }
+
     public Producto actualizarProducto(Long id, Producto producto) {
         ProductoValidator.validarId(id);
         ProductoValidator.validar(producto);
-        productoGateway.buscarPorId(id);
+        obtenerProducto(id);
         producto.setId(id);
         return productoGateway.guardar(producto);
     }

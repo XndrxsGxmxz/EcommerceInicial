@@ -1,18 +1,18 @@
 package com.ecommerce.catalogo.domain.usecase;
 
-import com.ecommerce.catalogo.domain.exception.CarritoNoFoundException;
-import com.ecommerce.catalogo.domain.exception.CarritoVacioException;
-import com.ecommerce.catalogo.domain.exception.StockInsuficienteException;
-import com.ecommerce.catalogo.domain.exception.UsuarioNoEncontradoException;
+import com.ecommerce.catalogo.domain.exception.*;
 import com.ecommerce.catalogo.domain.model.Carrito;
 import com.ecommerce.catalogo.domain.model.ItemCarrito;
 import com.ecommerce.catalogo.domain.model.Producto;
 import com.ecommerce.catalogo.domain.model.gateway.CarritoGateway;
+import com.ecommerce.catalogo.domain.model.gateway.TransaccionGateway;
 import com.ecommerce.catalogo.domain.model.gateway.UsuarioGateway;
 import com.ecommerce.catalogo.domain.usecase.validation.CarritoValidator;
 import lombok.RequiredArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -21,17 +21,18 @@ public class CarritoUseCase {
     private final CarritoGateway carritoGateway;
     private final ProductoUseCase productoUseCase;
     private final UsuarioGateway usuarioGateway;
+    private final TransaccionGateway transaccionGateway;
 
     public Carrito agregarProductoAlCarrito(Long usuarioId, ItemCarrito itemCarrito) {
         CarritoValidator.validarAgregar(usuarioId, itemCarrito);
 
         if (!usuarioGateway.usuarioExiste(usuarioId)) {
-            throw new UsuarioNoEncontradoException("Usuario no encontrado con ID: " + usuarioId);
+            throw new UsuarioNoEncontradoException(usuarioId);
         }
 
         Producto producto = productoUseCase.obtenerProducto(itemCarrito.getProductoId());
 
-        Carrito carrito = carritoGateway.buscarPorUsuarioId(usuarioId);
+        Carrito carrito = carritoGateway.buscarActivoPorUsuarioId(usuarioId);
         if (carrito == null) {
             carrito = new Carrito();
             carrito.setUsuarioId(usuarioId);
@@ -56,11 +57,11 @@ public class CarritoUseCase {
             ItemCarrito item = existente.get();
             item.setCantidad(cantidadFinal);
             item.setPrecioUnitario(producto.getPrecio());
-            item.setSubtotal(producto.getPrecio() * cantidadFinal);
+            item.setSubtotal(producto.getPrecio().multiply(BigDecimal.valueOf(cantidadFinal)));
         } else {
             itemCarrito.setNombreProducto(producto.getNombre());
             itemCarrito.setPrecioUnitario(producto.getPrecio());
-            itemCarrito.setSubtotal(producto.getPrecio() * itemCarrito.getCantidad());
+            itemCarrito.setSubtotal(producto.getPrecio().multiply(BigDecimal.valueOf(itemCarrito.getCantidad())));
             carrito.getItems().add(itemCarrito);
         }
 
@@ -70,9 +71,9 @@ public class CarritoUseCase {
 
     public Carrito verCarrito(Long usuarioId) {
         CarritoValidator.validarUsuarioId(usuarioId);
-        Carrito carrito = carritoGateway.buscarPorUsuarioId(usuarioId);
+        Carrito carrito = carritoGateway.buscarActivoPorUsuarioId(usuarioId);
         if (carrito == null) {
-            throw new CarritoNoFoundException("Carrito no encontrado para el usuario ID: " + usuarioId);
+            throw new CarritoNoEncontradoException("Carrito no encontrado para el usuario ID: " + usuarioId);
         }
         return carrito;
     }
@@ -87,7 +88,7 @@ public class CarritoUseCase {
                 .collect(Collectors.toList());
 
         if (itemsFiltrados.size() == carrito.getItems().size()) {
-            throw new CarritoNoFoundException(
+            throw new CarritoNoEncontradoException(
                     "El producto " + productoId + " no está en el carrito del usuario " + usuarioId);
         }
 
@@ -99,37 +100,69 @@ public class CarritoUseCase {
     public String realizarVenta(Long usuarioId) {
         CarritoValidator.validarUsuarioId(usuarioId);
 
-        Carrito carrito = carritoGateway.buscarPorUsuarioId(usuarioId);
+        Carrito carrito = carritoGateway.buscarActivoPorUsuarioId(usuarioId);
         if (carrito == null) {
-            throw new CarritoNoFoundException("Carrito no encontrado para el usuario ID: " + usuarioId);
+            throw new CarritoNoEncontradoException("No hay un carrito activo para el usuario ID: " + usuarioId);
         }
         if (carrito.getItems() == null || carrito.getItems().isEmpty()) {
             throw new CarritoVacioException(usuarioId);
         }
+        if (!usuarioGateway.usuarioExiste(usuarioId)) {
+            throw new UsuarioNoEncontradoException(usuarioId);
+        }
 
+        Map<ItemCarrito, Producto> productos = validarStock(carrito);
+
+        BigDecimal total = carrito.getPreciototal();
+        BigDecimal saldo = usuarioGateway.consultarSaldo(usuarioId);
+        if (saldo.compareTo(total) < 0) {
+            throw new SaldoInsuficienteException(saldo, total);
+        }
+
+        // 2. Ejecutar: stock + cierre del carrito + cobro en una transacción
+        AtomicBoolean cobrado = new AtomicBoolean(false);
+        try {
+            transaccionGateway.ejecutar(() -> {
+                descontarStock(productos);
+                carrito.setComprado(true);
+                carritoGateway.guardar(carrito);
+                usuarioGateway.descontarSaldo(usuarioId, total);
+                cobrado.set(true);
+            });
+        } catch (RuntimeException e) {
+            // 3. Compensación: Auth cobró pero la transacción local falló
+            if (cobrado.get()) {
+                usuarioGateway.reintegrarSaldo(usuarioId, total);
+            }
+            throw e;
+        }
+
+        return "La compra fue realizada exitosamente. Total: " + total;
+    }
+
+    private Map<ItemCarrito, Producto> validarStock(Carrito carrito) {
         Map<ItemCarrito, Producto> productos = new LinkedHashMap<>();
         for (ItemCarrito item : carrito.getItems()) {
             Producto producto = productoUseCase.obtenerProducto(item.getProductoId());
-            if (producto.getStock() == null || producto.getStock() < item.getCantidad()) {
-                throw new StockInsuficienteException(
-                        producto.getNombre(),
-                        producto.getStock() == null ? 0 : producto.getStock(),
-                        item.getCantidad());
+            int disponible = producto.getStock() == null ? 0 : producto.getStock();
+            if (disponible < item.getCantidad()) {
+                throw new StockInsuficienteException(producto.getNombre(), disponible, item.getCantidad());
             }
             productos.put(item, producto);
         }
+        return productos;
+    }
 
-        // 2) Descontar stock
+    private void descontarStock(Map<ItemCarrito, Producto> productos) {
         productos.forEach((item, producto) -> {
             producto.setStock(producto.getStock() - item.getCantidad());
             productoUseCase.guardarProducto(producto);
         });
-
-        carritoGateway.eliminarCarritoByUsuarioId(usuarioId);
-        return "La compra fue realizada exitosamente";
     }
 
-    private double calcularTotal(List<ItemCarrito> items) {
-        return items.stream().mapToDouble(ItemCarrito::getSubtotal).sum();
+    private BigDecimal calcularTotal(List<ItemCarrito> items) {
+        return items.stream()
+                .map(ItemCarrito::getSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

@@ -21,15 +21,9 @@ public class CarritoDataGatewayImpl implements CarritoGateway {
     }
 
     @Override
-    public Carrito buscarPorUsuarioId(Long usuarioId) {
-        return repository.findByUsuarioId(usuarioId)
+    public Carrito buscarActivoPorUsuarioId(Long usuarioId) {
+        return repository.findByUsuarioIdAndComprado(usuarioId, false)
                 .map(mapper::toDomain)
                 .orElse(null);
-    }
-
-    @Override
-    @Transactional
-    public void eliminarCarritoByUsuarioId(Long usuarioId) {
-        repository.deleteByUsuarioId(usuarioId);
     }
 }
